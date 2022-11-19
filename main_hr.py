@@ -64,7 +64,7 @@ IE{args.inner_ep}_N{args.neumann}_HLR{args.hlr}_{args.hvp_method}_{start_time}.y
         if args.no_blo== False:
             client_idx = np.random.choice(range(args.num_users), m, replace=False)
             client_manage=ClientManageHR(args,net_glob,client_idx, dataset_train, dict_users,hyper_param)
-            hg_glob, r = client_manage.fed_out()
+            hg_glob, r = client_manage.fed_out_minibatch()
             assign_hyper_gradient(hyper_param, hg_glob)
             hyper_optimizer.step()
             comm_round+=r
