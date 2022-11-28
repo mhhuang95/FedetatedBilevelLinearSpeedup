@@ -121,13 +121,14 @@ class ClientManageHR(ClientManage):
         # elif self.args.hvp_method == 'local_batch':
         for _ in range(self.args.neumann):
             p_locals=[]
-            client_p_idx = np.random.choice(range(args.num_users), m, replace=False)
+            client_p_idx = np.random.choice(range(self.args.num_users), m, replace=False)
+            client_locals_p = []
             for p_idx in client_p_idx:
                 client_p= Client(self.args, p_idx, copy.deepcopy(self.net_glob),self.dataset, self.dict_users, self.hyper_param)
                 client_locals_p.append(client_p)
 
             for i in range(m):
-                p_n = client.hvp_iter(ps[i], self.args.hlr)
+                p_n = client_locals_p[i].hvp_iter(ps[i], self.args.hlr)
                 p_locals.append(p_n)
             
             ps = p_locals
@@ -242,18 +243,15 @@ class ClientManageHR(ClientManage):
         #     hg= client.hyper_grad(p.clone())
         #     hg_locals.append(hg)
         hg_glob=FedAvgP(hg_locals, self.args)
-        # print(hg_glob)
-        # comm_round+=1
-        # hg_locals =[]
-        # for client in client_locals:
-        #     for _ in range(self.args.outer_tau):
-        #         h = client.hyper_svrg_update(hg_glob)
-        #     hg_locals.append(h)
-            
-        # hg_glob=FedAvgP(hg_locals, self.args)
+        print(hg_glob)
         comm_round+=1
-
-
+        hg_locals =[]
+        for client in client_locals:
+            h = client.hyper_update(hg_glob)
+            hg_locals.append(h)
+            
+        hg_glob=FedAvgP(hg_locals, self.args)
+        comm_round+=1
 
         return hg_glob, comm_round
 
