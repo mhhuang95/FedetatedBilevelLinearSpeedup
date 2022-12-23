@@ -1,6 +1,6 @@
 import torch
 from torchvision import datasets, transforms
-from utils.sampling import mnist_iid, mnist_iid_normal, mnist_noniid, cifar_iid, mnist_noniid_normal, minmax_dataset, fmnist_iid_normal, fmnist_noniid_normal
+from utils.sampling import mnist_iid, mnist_iid_normal, mnist_noniid, cifar_iid, mnist_noniid_normal, mnist_noniid_normal_digits, minmax_dataset, fmnist_iid_normal, fmnist_noniid_normal
 import numpy as np
 import random
 def load_data(args):
@@ -16,7 +16,7 @@ def load_data(args):
         if args.iid:
             dict_users, dataset_train_real = mnist_iid_normal(dataset_train, args.num_users)
         else:
-            dict_users, dataset_train_real = mnist_noniid_normal(dataset_train, args.num_users)
+            dict_users, dataset_train_real = mnist_noniid_normal_digits(dataset_train, args.num_users)
     elif args.dataset == 'cifar':
         trans_cifar = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])

@@ -76,14 +76,16 @@ class ClientManageHR(ClientManage):
             d_out_d_y_locals.append(d_out_d_y)
         p=FedAvgP(d_out_d_y_locals,self.args)
         
-        p_locals=[]
+        
         if self.args.hvp_method == 'global_batch':
             for i in range(self.args.neumann):
+                p_locals=[]
                 for client in client_locals:
                     p_client = client.hvp_iter(p, self.args.hlr)
                     p_locals.append(p_client)
                 p=FedAvgP(p_locals, self.args)
         elif self.args.hvp_method == 'local_batch':
+            p_locals=[]
             for client in client_locals:
                 p_client=p.clone()
                 for _ in range(self.args.neumann):
@@ -109,16 +111,7 @@ class ClientManageHR(ClientManage):
         for client in client_locals:
             d_out_d_y,_=client.grad_d_out_d_y()
             ps.append(d_out_d_y)
-        # p=FedAvgP(d_out_d_y_locals,self.args)
         
-        
-        # if self.args.hvp_method == 'global_batch':
-        #     for i in range(self.args.neumann):
-        #         for client in client_locals:
-        #             p_client = client.hvp_iter(p, self.args.hlr)
-        #             p_locals.append(p_client)
-        #         p=FedAvgP(p_locals, self.args)
-        # elif self.args.hvp_method == 'local_batch':
         for _ in range(self.args.neumann):
             p_locals=[]
             client_p_idx = np.random.choice(range(self.args.num_users), m, replace=False)
@@ -139,19 +132,6 @@ class ClientManageHR(ClientManage):
             hg_locals.append(hg)
         return hg_locals
 
-        # p_locals.append(p_client)
-        # p=FedAvgP(p_locals, self.args)
-        # elif self.args.hvp_method == 'seperate':
-        #     for client in client_locals:
-        #         d_out_d_y,_=client.grad_d_out_d_y()
-        #         p_client=d_out_d_y.clone()
-        #         for _ in range(self.args.neumann):
-        #             p_client = client.hvp_iter(p_client, self.args.hlr)
-        #         p_locals.append(p_client)
-        #     p=FedAvgP(p_locals, self.args)
-
-        # else:
-        #     raise NotImplementedError
         
 
     def lfed_out(self,client_locals):

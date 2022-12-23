@@ -82,8 +82,52 @@ def mnist_iid(dataset, num_users):
         
     return dict_users, dataset_real
 
+def mnist_noniid_normal_digits(dataset, num_users, num_digits=1):
+    """
+    Sample non-I.I.D client data from MNIST dataset
+    :param dataset:
+    :param num_users:
+    :return:
+    """
+
+    #dict_users = {i: np.array([], dtype='int64') for i in range((-num_users-1),num_users)}
+
+    labels = dataset.targets.numpy()
+
+    num_shards, num_imgs = 200, 300
+    dict_users = {i: np.array([], dtype='int64') for i in range((-num_users-1),num_users)}
+    dict_digit = {i: [] for i in range(10)} 
+    idxs = np.arange(num_shards*num_imgs)
+
+    # sort labels
+    idxs_labels = np.vstack((idxs, labels))
+
+    for i in range(10):
+        dict_digit[i] = idxs_labels[0][idxs_labels[1] == i]
+
+    # divide and assign
+    for i in range(num_users):
+
+        digit_set = set(np.random.choice(10, num_digits, replace=False))
+        digit_idx = []
+        for d in digit_set:
+            digit_idx.extend(dict_digit[d])
+        
+        train_index = np.random.choice(digit_idx, 600, replace=False)
+
+        print(labels[train_index])
+
+        # print(len(train_index))
+        #train_index= list(train_index)
+        train_index=np.array(train_index)
+        val_index = np.random.choice(train_index, ceil(train_index.shape[0]*0.2), replace=False)
+        train_index = np.array(list(set(train_index) - set(val_index)))
+
+        dict_users[i] = train_index
+        dict_users[-i-1] = val_index
 
 
+    return dict_users, dataset
 
 
 def mnist_noniid_normal(dataset, num_users):
@@ -108,7 +152,7 @@ def mnist_noniid_normal(dataset, num_users):
     idxs_labels = idxs_labels[:,idxs_labels[1,:].argsort()]
     idxs = idxs_labels[0,:]
 
-    # print(idxs_labels.shape, idxs_labels)
+    print(idxs_labels.shape, idxs_labels)
     
     # divide and assign
     for i in range(num_users):
@@ -352,4 +396,4 @@ if __name__ == '__main__':
                                        transforms.Normalize((0.1307,), (0.3081,))
                                    ]))
     num = 100
-    d = mnist_noniid(dataset_train, num)
+    d = mnist_noniid_normal(dataset_train, num)
