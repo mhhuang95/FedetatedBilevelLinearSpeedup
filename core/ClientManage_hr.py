@@ -127,12 +127,13 @@ class ClientManageHR(ClientManage):
             ps = p_locals
 
         hg_locals =[]
-        for i, client in enumerate(client_locals):
-            hg= client.hyper_grad(ps[i].clone())
+        client_p_idx = np.random.choice(range(self.args.num_users), m, replace=False)
+        client_locals_p = []
+        for i, p_idx in enumerate(client_p_idx):
+            client_p= Client(self.args, p_idx, copy.deepcopy(self.net_glob),self.dataset, self.dict_users, self.hyper_param)
+            hg= client_p.hyper_grad(ps[i].clone())
             hg_locals.append(hg)
         return hg_locals
-
-        
 
     def lfed_out(self,client_locals):
         hg_locals =[]
